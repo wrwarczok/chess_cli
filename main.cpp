@@ -1,5 +1,5 @@
 #include<stdio.h>
-#include<iostream>
+#include<stdlib.h>
 
 #include"pieces.h"
 
@@ -51,23 +51,24 @@ void renderChessboard(Piece* chessboard[8][8], Piece pieces[32])
 {
     for(int i=0; i<8; i++)
     {
-        std::cout<<8-i<<'|';
+        printf("%c|",8-i);
         for(int j=0; j<8; j++)
         {
             if (chessboard[i][j]!=NULL)
-                std::cout<<chessboard[i][j]->renderPiece();
+                printf("%c", chessboard[i][j]->renderPiece() );
             else
                 if((i+j)%2)
-                    std::cout<<'_';
+                    printf("_");
                 else
-                    std::cout<<' ';
+                    printf(" ");
         }
-        std::cout<<'|'<<std::endl;
+        printf("|\n");
     }
-    std::cout<<" +--------+\n"<<"  abcdefgh\n";
+    printf(" +--------+\n"
+            "  abcdefgh\n");
 }
 
-bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2, bool blacksMove)
+bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2, bool blacksMove, bool kingMoved)
 {
     if (chessboard[7-(y1-'1')][x1-'a'] != NULL)
     {
@@ -165,7 +166,7 @@ bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned ch
         if(blacksMove!=chessboard[7-(y1-'1')][x1-'a']->getBlackness()) //choosing piece of wrong colour
         {
             isLegal=0;
-            std::cout<<"Piece of wrong colour. ";
+            printf("Piece of wrong colour. ");
         }
         if(chessboard[7-(y2-'1')][x2-'a']!=NULL)
         {
@@ -180,13 +181,13 @@ bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned ch
         }
         else
         {
-            std::cout<<"Illegal move. Try again."<<std::endl;
+            printf("Illegal move. Try again.\n");
             return 0;
         }
     }
     else
     {
-        std::cout<<"There's no piece to move. Try again."<<std::endl;
+        printf("There's no piece to move. Try again.\n");
         return 0;
     }
 }
@@ -196,7 +197,8 @@ int main()
     unsigned char x1,y1,x2,y2;
     Piece* chessboard[8][8];
     Piece pieces[32];
-    bool blacksMove=false;
+    bool blacksMove=0;
+    bool kingMoved[2]={0,0};
 
     initChessboard(chessboard, pieces);
     while (true)
@@ -209,7 +211,7 @@ int main()
             getchar();
         }
         while( x1<'a' || x1>'h' || y1<'1' || y1>'8' || x2<'a' || x2>'h' || y2<'1' || y2>'8');
-        if(move(chessboard, pieces, x1, y1, x2, y2, blacksMove))
+        if(move(chessboard, pieces, x1, y1, x2, y2, blacksMove, kingMoved[blacksMove]))
             blacksMove=!blacksMove;
     }
     return 0;

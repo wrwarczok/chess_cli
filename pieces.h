@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 enum Figure
 {
     king,queen,rook,bishop,knight,pawn
