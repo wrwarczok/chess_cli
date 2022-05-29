@@ -31,10 +31,10 @@ void initChessboard(Piece* chessboard[8][8], Piece pieces[32])
                             pieces[tmp++].setPiece(isBlack,bishop);
                             break;
                     case 3: chessboard[i][j]=&pieces[tmp];
-                            pieces[tmp++].setPiece(isBlack,king);
+                            pieces[tmp++].setPiece(isBlack,queen);
                             break;
                     case 4: chessboard[i][j]=&pieces[tmp];
-                            pieces[tmp++].setPiece(isBlack,queen);
+                            pieces[tmp++].setPiece(isBlack,king);
                             break;
                 }
             }
@@ -51,7 +51,7 @@ void renderChessboard(Piece* chessboard[8][8], Piece pieces[32])
 {
     for(int i=0; i<8; i++)
     {
-        printf("%c|",8-i);
+        printf("%i|",8-i);
         for(int j=0; j<8; j++)
         {
             if (chessboard[i][j]!=NULL)
@@ -68,7 +68,7 @@ void renderChessboard(Piece* chessboard[8][8], Piece pieces[32])
             "  abcdefgh\n");
 }
 
-bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2, bool blacksMove, bool kingMoved)
+bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2, bool blacksMove, bool &kingMoved)
 {
     if (chessboard[7-(y1-'1')][x1-'a'] != NULL)
     {
@@ -163,6 +163,30 @@ bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned ch
                         }
                         break;
         }
+        if( chessboard[7-(y1-'1')][x1-'a']->getType()==king && !kingMoved && (x2=='c' || x2=='g') ) //castling
+        {
+            isLegal = y2==y1 && x2=='c' && chessboard[7-(y1-'1')]['a'-'a']->getType()==rook; //castling queenside
+            for(char c='b'; c<='d'; c++) //if b,c and d (1 or 8) are empty
+                isLegal &= chessboard[7-(y1-'1')][c-'a']==NULL;
+            if(isLegal && blacksMove==chessboard[7-(y1-'1')][x1-'a']->getBlackness())
+            {
+                chessboard[7-(y1-'1')]['d'-'a']=chessboard[7-(y1-'1')]['a'-'a'];
+                chessboard[7-(y1-'1')]['a'-'a']=NULL;
+                kingMoved=1;
+            }
+            else
+            {
+                isLegal = y2==y1 && x2=='g' && chessboard[7-(y1-'1')]['h'-'a']->getType()==rook; //castling kingside
+                for(char c='f'; c<='g'; c++) //if f and g (1 or 8) are empty
+                    isLegal &= chessboard[7-(y1-'1')][c-'a']==NULL;
+                if(isLegal && blacksMove==chessboard[7-(y1-'1')][x1-'a']->getBlackness())
+                {
+                    chessboard[7-(y1-'1')]['f'-'a']=chessboard[7-(y1-'1')]['h'-'a'];
+                    chessboard[7-(y1-'1')]['h'-'a']=NULL;
+                    kingMoved=1;
+                }
+            }
+        }
         if(blacksMove!=chessboard[7-(y1-'1')][x1-'a']->getBlackness()) //choosing piece of wrong colour
         {
             isLegal=0;
@@ -172,25 +196,6 @@ bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned ch
         {
             isLegal&=chessboard[7-(y2-'1')][x2-'a']->getBlackness()!=chessboard[7-(y1-'1')][x1-'a']->getBlackness(); //can't hit piece of same color
             
-        }
-        if( chessboard[7-(y1-'1')][x1-'a']->getType()==king && !kingMoved && (x2=='c' || x2=='g') ) //castling
-        {
-            isLegal = y2==y1 && x2=='c' && chessboard[7-(y1-'1')]['a'-'a']->getType()==rook; //castling queenside
-            for(char c='b'; c<='d'; c++) //if b,c and d (1 or 8) are empty
-                isLegal &= chessboard[7-(y1-'1')][c-'a']==NULL;
-            if(isLegal)
-            {
-                chessboard[7-(y1-'1')]['c'-'a']=chessboard[7-(y1-'1')]['a'-'a'];
-                chessboard[7-(y1-'1')]['a'-'a']=NULL;
-            }
-            isLegal = y2==y1 && x2=='g' && chessboard[7-(y1-'1')]['h'-'a']->getType()==rook; //castling kingside
-            for(char c='f'; c<='g'; c++) //if f and g (1 or 8) are empty
-                isLegal &= chessboard[7-(y1-'1')][c-'a']==NULL;
-            if(isLegal)
-            {
-                chessboard[7-(y1-'1')]['f'-'a']=chessboard[7-(y1-'1')]['h'-'a'];
-                chessboard[7-(y1-'1')]['h'-'a']=NULL;
-            }
         }
         if(isLegal)
         {
@@ -232,6 +237,7 @@ int main()
         while( x1<'a' || x1>'h' || y1<'1' || y1>'8' || x2<'a' || x2>'h' || y2<'1' || y2>'8');
         if(move(chessboard, pieces, x1, y1, x2, y2, blacksMove, kingMoved[blacksMove]))
             blacksMove=!blacksMove;
+        printf("%i %i\n", kingMoved[0], kingMoved[1]);
     }
     return 0;
 }
