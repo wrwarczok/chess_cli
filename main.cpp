@@ -173,6 +173,10 @@ bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned ch
             isLegal&=chessboard[7-(y2-'1')][x2-'a']->getBlackness()!=chessboard[7-(y1-'1')][x1-'a']->getBlackness(); //can't hit piece of same color
             
         }
+        if( chessboard[7-(y1-'1')][x1-'a']->getType()==king && !kingMoved)
+        {
+            isLegal = y2==y1;
+        }
         if(isLegal)
         {
             chessboard[7-(y2-'1')][x2-'a'] = chessboard[7-(y1-'1')][x1-'a'];
