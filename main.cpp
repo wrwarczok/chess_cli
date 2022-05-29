@@ -173,9 +173,24 @@ bool move(Piece* chessboard[8][8], Piece pieces[], unsigned char x1, unsigned ch
             isLegal&=chessboard[7-(y2-'1')][x2-'a']->getBlackness()!=chessboard[7-(y1-'1')][x1-'a']->getBlackness(); //can't hit piece of same color
             
         }
-        if( chessboard[7-(y1-'1')][x1-'a']->getType()==king && !kingMoved)
+        if( chessboard[7-(y1-'1')][x1-'a']->getType()==king && !kingMoved && (x2=='c' || x2=='g') ) //castling
         {
-            isLegal = y2==y1;
+            isLegal = y2==y1 && x2=='c' && chessboard[7-(y1-'1')]['a'-'a']->getType()==rook; //castling queenside
+            for(char c='b'; c<='d'; c++) //if b,c and d (1 or 8) are empty
+                isLegal &= chessboard[7-(y1-'1')][c-'a']==NULL;
+            if(isLegal)
+            {
+                chessboard[7-(y1-'1')]['c'-'a']=chessboard[7-(y1-'1')]['a'-'a'];
+                chessboard[7-(y1-'1')]['a'-'a']=NULL;
+            }
+            isLegal = y2==y1 && x2=='g' && chessboard[7-(y1-'1')]['h'-'a']->getType()==rook; //castling kingside
+            for(char c='f'; c<='g'; c++) //if f and g (1 or 8) are empty
+                isLegal &= chessboard[7-(y1-'1')][c-'a']==NULL;
+            if(isLegal)
+            {
+                chessboard[7-(y1-'1')]['f'-'a']=chessboard[7-(y1-'1')]['h'-'a'];
+                chessboard[7-(y1-'1')]['h'-'a']=NULL;
+            }
         }
         if(isLegal)
         {
